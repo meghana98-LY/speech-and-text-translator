@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Text Detail - STT/TTS Translator{% endblock %}
+
+{% block content %}
+<div class="container-main">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">🔊 Text to Speech Details</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Language</th>
+                            <td><strong>{{ text.get_language_display }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Created</th>
+                            <td>{{ text.created_at|date:"Y-m-d H:i:s" }}</td>
+                        </tr>
+                    </table>
+
+                    <div class="mt-4">
+                        <h5>📝 Original Text</h5>
+                        <div class="alert alert-light border">
+                            {{ text.text_input }}
+                        </div>
+                    </div>
+
+                    {% if text.audio_output %}
+                        <div class="mt-4">
+                            <h5>🔊 Generated Audio</h5>
+                            <audio controls style="width: 100%;">
+                                <source src="{{ text.audio_output.url }}" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                            <div class="mt-2">
+                                <a href="{{ text.audio_output.url }}" download class="btn btn-sm btn-primary">
+                                    <i class="fas fa-download"></i> Download Audio
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mt-4">
+                            <p class="mb-0">Audio generation pending or not available yet.</p>
+                        </div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        <a href="{% url 'translator:tts' %}" class="btn btn-secondary">Back to Text to Speech</a>
+                        <a href="{% url 'translator:delete_text' text.pk %}" class="btn btn-danger">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

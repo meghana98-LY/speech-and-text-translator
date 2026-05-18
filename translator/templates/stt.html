@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Speech to Text - STT/TTS Translator{% endblock %}
+
+{% block content %}
+<div class="container-main">
+    <h2>🎙️ Speech to Text Conversion</h2>
+    <hr>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Upload Audio File</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.audio_file.id_for_label }}" class="form-label">Select Audio File</label>
+                            {{ form.audio_file }}
+                            {% if form.audio_file.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.audio_file.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.language.id_for_label }}" class="form-label">Language</label>
+                            {{ form.language }}
+                            {% if form.language.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.language.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-upload"></i> Upload & Convert
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📝 Supported Formats</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">We support the following audio formats:</p>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">🎵 MP3</li>
+                        <li class="list-group-item">🔊 WAV</li>
+                        <li class="list-group-item">🎶 OGG</li>
+                        <li class="list-group-item">🎼 M4A</li>
+                        <li class="list-group-item">🎧 FLAC</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h4>📂 Recent Audio Files</h4>
+        {% if audio_files %}
+            <div class="list-group mt-3">
+                {% for audio in audio_files %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">🎙️ {{ audio.get_language_display }}</h6>
+                                <small class="text-muted">Uploaded: {{ audio.uploaded_at|date:"Y-m-d H:i" }}</small>
+                            </div>
+                            <div>
+                                <a href="{% url 'translator:audio_detail' audio.pk %}" class="btn btn-sm btn-info">View</a>
+                                <a href="{% url 'translator:delete_audio' audio.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                            </div>
+                        </div>
+                        {% if audio.text_output %}
+                            <div class="mt-2">
+                                <small><strong>Transcription:</strong> {{ audio.text_output|truncatewords:20 }}</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info mt-3">
+                <p class="mb-0">No audio files yet. Upload one to get started!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

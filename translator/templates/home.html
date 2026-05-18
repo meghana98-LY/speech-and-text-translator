@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - STT/TTS Translator{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <h1>Welcome to STT/TTS Translator</h1>
+    <p>Convert between Speech and Text with ease</p>
+</div>
+
+<div class="container-main">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🎙️ Speech to Text</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Convert audio files to text. Upload your audio in any supported format and get instant transcription.</p>
+                    <ul class="list-unstyled">
+                        <li>✓ Supports MP3, WAV, OGG, M4A, FLAC</li>
+                        <li>✓ Multiple languages</li>
+                        <li>✓ Fast conversion</li>
+                    </ul>
+                    <a href="{% url 'translator:stt' %}" class="btn btn-primary w-100 mt-3">Start Converting</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">🔊 Text to Speech</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Convert text to natural-sounding speech. Enter your text and get an audio file in your preferred language.</p>
+                    <ul class="list-unstyled">
+                        <li>✓ Natural voices</li>
+                        <li>✓ Multiple languages</li>
+                        <li>✓ Instant generation</li>
+                    </ul>
+                    <a href="{% url 'translator:tts' %}" class="btn btn-primary w-100 mt-3">Start Converting</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-main">
+    <h3>How to Use</h3>
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h5>Speech to Text:</h5>
+            <ol>
+                <li>Click on "Speech to Text" in the navigation</li>
+                <li>Upload your audio file</li>
+                <li>Select the language</li>
+                <li>Get your transcribed text</li>
+            </ol>
+        </div>
+        <div class="col-md-6">
+            <h5>Text to Speech:</h5>
+            <ol>
+                <li>Click on "Text to Speech" in the navigation</li>
+                <li>Enter your text</li>
+                <li>Select the language and voice</li>
+                <li>Download your audio file</li>
+            </ol>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Text to Speech - STT/TTS Translator{% endblock %}
+
+{% block content %}
+<div class="container-main">
+    <h2>🔊 Text to Speech Conversion</h2>
+    <hr>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Convert Text to Audio</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.text_input.id_for_label }}" class="form-label">Enter Text</label>
+                            {{ form.text_input }}
+                            {% if form.text_input.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.text_input.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.language.id_for_label }}" class="form-label">Language</label>
+                            {{ form.language }}
+                            {% if form.language.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.language.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-play"></i> Convert to Speech
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">💡 Tips</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">✓ Enter text with proper punctuation for better results</li>
+                        <li class="mb-2">✓ Maximum 5000 characters per conversion</li>
+                        <li class="mb-2">✓ Select your preferred language</li>
+                        <li class="mb-2">✓ Download the generated audio file</li>
+                        <li class="mb-2">✓ Supported formats: MP3, WAV</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h4>📜 Recent Conversions</h4>
+        {% if text_files %}
+            <div class="list-group mt-3">
+                {% for text in text_files %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">🔊 {{ text.get_language_display }}</h6>
+                                <small class="text-muted">Created: {{ text.created_at|date:"Y-m-d H:i" }}</small>
+                            </div>
+                            <div>
+                                <a href="{% url 'translator:text_detail' text.pk %}" class="btn btn-sm btn-info">View</a>
+                                <a href="{% url 'translator:delete_text' text.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <small><strong>Text:</strong> {{ text.text_input|truncatewords:15 }}</small>
+                        </div>
+                        {% if text.audio_output %}
+                            <div class="mt-2">
+                                <audio controls style="width: 100%; max-width: 300px;">
+                                    <source src="{{ text.audio_output.url }}" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info mt-3">
+                <p class="mb-0">No conversions yet. Enter some text to get started!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
