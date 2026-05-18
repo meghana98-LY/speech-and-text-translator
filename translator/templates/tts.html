@@ -1,102 +1,101 @@
 {% extends 'base.html' %}
 
-{% block title %}Text to Speech - STT/TTS Translator{% endblock %}
+{% block title %}Text to Speech - Translator{% endblock %}
 
 {% block content %}
-<div class="container-main">
-    <h2>🔊 Text to Speech Conversion</h2>
-    <hr>
-
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Convert Text to Audio</h5>
-                </div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="{{ form.text_input.id_for_label }}" class="form-label">Enter Text</label>
-                            {{ form.text_input }}
-                            {% if form.text_input.errors %}
-                                <div class="text-danger small mt-1">
-                                    {{ form.text_input.errors }}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="{{ form.language.id_for_label }}" class="form-label">Language</label>
-                            {{ form.language }}
-                            {% if form.language.errors %}
-                                <div class="text-danger small mt-1">
-                                    {{ form.language.errors }}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-play"></i> Convert to Speech
-                        </button>
-                    </form>
-                </div>
-            </div>
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+        
+        <div class="text-center mb-5">
+            <h2 class="fw-bold" style="background: linear-gradient(to right, #f472b6, #fb7185); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">🔊 Text to Speech</h2>
+            <p class="text-muted">Generate natural-sounding audio from your translated text instantly.</p>
         </div>
 
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">💡 Tips</h5>
+        <div class="glass-card p-4">
+            <form method="post" class="mt-2">
+                {% csrf_token %}
+                
+                <div class="mb-4">
+                    <label for="{{ form.text_input.id_for_label }}" class="form-label">Enter Text to Convert</label>
+                    {{ form.text_input }}
+                    {% if form.text_input.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.text_input.errors }}
+                        </div>
+                    {% endif %}
                 </div>
-                <div class="card-body">
-                    <ul class="list-unstyled">
-                        <li class="mb-2">✓ Enter text with proper punctuation for better results</li>
-                        <li class="mb-2">✓ Maximum 5000 characters per conversion</li>
-                        <li class="mb-2">✓ Select your preferred language</li>
-                        <li class="mb-2">✓ Download the generated audio file</li>
-                        <li class="mb-2">✓ Supported formats: MP3, WAV</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="mt-4">
-        <h4>📜 Recent Conversions</h4>
-        {% if text_files %}
-            <div class="list-group mt-3">
-                {% for text in text_files %}
-                    <div class="list-group-item">
-                        <div class="d-flex w-100 justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">🔊 {{ text.get_language_display }}</h6>
-                                <small class="text-muted">Created: {{ text.created_at|date:"Y-m-d H:i" }}</small>
-                            </div>
-                            <div>
-                                <a href="{% url 'translator:text_detail' text.pk %}" class="btn btn-sm btn-info">View</a>
-                                <a href="{% url 'translator:delete_text' text.pk %}" class="btn btn-sm btn-danger">Delete</a>
-                            </div>
-                        </div>
-                        <div class="mt-2">
-                            <small><strong>Text:</strong> {{ text.text_input|truncatewords:15 }}</small>
-                        </div>
-                        {% if text.audio_output %}
-                            <div class="mt-2">
-                                <audio controls style="width: 100%; max-width: 300px;">
-                                    <source src="{{ text.audio_output.url }}" type="audio/mpeg">
-                                    Your browser does not support the audio element.
-                                </audio>
-                            </div>
-                        {% endif %}
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="{{ form.language.id_for_label }}" class="form-label">Input Language</label>
+                        {{ form.language }}
                     </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="alert alert-info mt-3">
-                <p class="mb-0">No conversions yet. Enter some text to get started!</p>
-            </div>
-        {% endif %}
+                    <div class="col-md-6">
+                        <label for="{{ form.output_language.id_for_label }}" class="form-label">Translate To</label>
+                        {{ form.output_language }}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-3 text-uppercase" style="background: linear-gradient(135deg, #f472b6, #fb7185); box-shadow: 0 4px 15px rgba(244, 114, 182, 0.4);">
+                    <i class="fas fa-magic me-2"></i> Translate & Generate Audio
+                </button>
+            </form>
+        </div>
+
+        <div class="mt-5">
+            <h4 class="mb-4">📜 Recent Conversions</h4>
+            {% if text_files %}
+                <div class="list-group">
+                    {% for text in text_files %}
+                        <div class="list-group-item p-4">
+                            <div class="d-flex w-100 justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-1 text-white"><i class="fas fa-language me-2" style="color: #f472b6;"></i> {{ text.get_language_display }} ➔ {{ text.get_output_language_display }}</h6>
+                                    <small class="text-muted"><i class="far fa-clock me-1"></i> {{ text.created_at|date:"Y-m-d H:i" }}</small>
+                                </div>
+                                <div>
+                                    <a href="{% url 'translator:text_detail' text.pk %}" class="btn btn-sm btn-outline-info rounded-pill px-3 me-1">View</a>
+                                    <a href="{% url 'translator:delete_text' text.pk %}" class="btn btn-sm btn-outline-danger rounded-pill px-3">Delete</a>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded h-100" style="background: rgba(0,0,0,0.2); border-left: 3px solid var(--text-muted);">
+                                        <small class="text-uppercase text-muted fw-bold d-block mb-1">Original Text:</small>
+                                        <span class="text-white">{{ text.text_input|truncatewords:20 }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded h-100" style="background: rgba(0,0,0,0.2); border-left: 3px solid #f472b6;">
+                                        <small class="text-uppercase text-muted fw-bold d-block mb-1">Translated Text:</small>
+                                        {% if text.translated_text %}
+                                            <span class="text-white">{{ text.translated_text|truncatewords:20 }}</span>
+                                        {% else %}
+                                            <span class="text-muted fst-italic">Translation failed or not available</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if text.audio_output %}
+                                <div class="mt-3">
+                                    <audio controls class="w-100">
+                                        <source src="{{ text.audio_output.url }}" type="audio/mpeg">
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <p class="mb-0 text-center"><i class="fas fa-info-circle me-2"></i> No conversions yet. Enter some text to get started!</p>
+                </div>
+            {% endif %}
+        </div>
+        
     </div>
 </div>
 {% endblock %}

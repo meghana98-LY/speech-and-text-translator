@@ -25,7 +25,14 @@ class AudioFile(models.Model):
     language = models.CharField(
         max_length=10,
         choices=LANGUAGE_CHOICES,
-        default='en'
+        default='en',
+        help_text='Input Language'
+    )
+    output_language = models.CharField(
+        max_length=10,
+        choices=LANGUAGE_CHOICES,
+        default='en',
+        help_text='Language to translate to'
     )
     text_output = models.TextField(blank=True, null=True, help_text='Transcribed text from audio')
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -53,8 +60,16 @@ class TextFile(models.Model):
     language = models.CharField(
         max_length=10,
         choices=LANGUAGE_CHOICES,
-        default='en'
+        default='en',
+        help_text='Input Language'
     )
+    output_language = models.CharField(
+        max_length=10,
+        choices=LANGUAGE_CHOICES,
+        default='en',
+        help_text='Language to translate to'
+    )
+    translated_text = models.TextField(blank=True, null=True, help_text='Translated text')
     audio_output = models.FileField(
         upload_to='tts/',
         blank=True,

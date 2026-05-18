@@ -58,12 +58,15 @@ TEMPLATES = [
 WSGI_APPLICATION = 'stt_tts_site.wsgi.application'
 
 
+import dj_database_url
+
 # -------------------- Database --------------------
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default='postgresql://neondb_owner:npg_9QWC5NhjegLa@ep-super-smoke-aqrq7dbn-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require',
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 
 

@@ -1,97 +1,286 @@
 {% extends 'base.html' %}
 
-{% block title %}Speech to Text - STT/TTS Translator{% endblock %}
+{% block title %}Speech to Text - Translator{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Styling for the tab navigation */
+    .nav-tabs {
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 25px;
+    }
+    .nav-tabs .nav-link {
+        color: var(--text-muted);
+        border: none;
+        padding: 12px 25px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        border-radius: 0;
+        background: transparent;
+        transition: all 0.3s ease;
+    }
+    .nav-tabs .nav-link:hover {
+        color: white;
+    }
+    .nav-tabs .nav-link.active {
+        color: white;
+        background: transparent;
+        border-bottom: 2px solid var(--primary-color);
+    }
+    
+    /* Recording button pulse animation */
+    .btn-record {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        font-size: 2rem;
+        background: rgba(15, 23, 42, 0.8);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        color: #f87171;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .btn-record:hover {
+        background: rgba(30, 41, 59, 0.9);
+        color: #ef4444;
+        transform: scale(1.05);
+    }
+    
+    .recording-pulse {
+        background: #ef4444 !important;
+        color: white !important;
+        border-color: #ef4444 !important;
+        animation: pulse-ring 1.5s infinite;
+    }
+    
+    @keyframes pulse-ring {
+        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+        70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    
+    #recording-status {
+        height: 24px;
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container-main">
-    <h2>🎙️ Speech to Text Conversion</h2>
-    <hr>
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+        
+        <div class="text-center mb-5">
+            <h2 class="fw-bold" style="background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">🎙️ Speech to Text</h2>
+            <p class="text-muted">Record or upload audio to transcribe and translate it instantly.</p>
+        </div>
 
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Upload Audio File</h5>
-                </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
+        <div class="glass-card p-4">
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-tabs justify-content-center" id="sttTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="record-tab" data-bs-toggle="tab" data-bs-target="#record" type="button" role="tab">🎙️ Record Audio</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab">📁 Upload File</button>
+                </li>
+            </ul>
+
+            <!-- Tabs Content -->
+            <div class="tab-content" id="sttTabsContent">
+                
+                <!-- RECORD TAB -->
+                <div class="tab-pane fade show active" id="record" role="tabpanel">
+                    <form method="post" enctype="multipart/form-data" id="record-form" class="mt-4">
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="{{ form.audio_file.id_for_label }}" class="form-label">Select Audio File</label>
-                            {{ form.audio_file }}
-                            {% if form.audio_file.errors %}
-                                <div class="text-danger small mt-1">
-                                    {{ form.audio_file.errors }}
-                                </div>
-                            {% endif %}
+                        
+                        <div class="text-center mb-4">
+                            <div id="btn-record" class="btn-record shadow">
+                                <i class="fas fa-microphone"></i>
+                            </div>
+                            <div id="recording-status" class="text-danger mb-3"></div>
+                            
+                            <!-- Audio Playback Preview (Hidden by default) -->
+                            <audio id="audio-preview" controls class="d-none w-100 mb-3"></audio>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="{{ form.language.id_for_label }}" class="form-label">Language</label>
-                            {{ form.language }}
-                            {% if form.language.errors %}
-                                <div class="text-danger small mt-1">
-                                    {{ form.language.errors }}
-                                </div>
-                            {% endif %}
+                        <!-- Hidden file input for recorded audio -->
+                        <input type="file" name="audio_file" id="recorded-audio-file" class="d-none" accept="audio/*">
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Input Language</label>
+                                {{ form.language }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Translate To</label>
+                                {{ form.output_language }}
+                            </div>
                         </div>
-
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-upload"></i> Upload & Convert
+                        
+                        <button type="submit" id="btn-submit-recording" class="btn btn-primary w-100 py-3 text-uppercase" disabled>
+                            <i class="fas fa-magic me-2"></i> Transcribe & Translate
                         </button>
                     </form>
                 </div>
-            </div>
-        </div>
 
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">📝 Supported Formats</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">We support the following audio formats:</p>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">🎵 MP3</li>
-                        <li class="list-group-item">🔊 WAV</li>
-                        <li class="list-group-item">🎶 OGG</li>
-                        <li class="list-group-item">🎼 M4A</li>
-                        <li class="list-group-item">🎧 FLAC</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
+                <!-- UPLOAD TAB -->
+                <div class="tab-pane fade" id="upload" role="tabpanel">
+                    <form method="post" enctype="multipart/form-data" class="mt-4">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.audio_file.id_for_label }}" class="form-label">Select Audio File</label>
+                            {{ form.audio_file }}
+                        </div>
 
-    <div class="mt-4">
-        <h4>📂 Recent Audio Files</h4>
-        {% if audio_files %}
-            <div class="list-group mt-3">
-                {% for audio in audio_files %}
-                    <div class="list-group-item">
-                        <div class="d-flex w-100 justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">🎙️ {{ audio.get_language_display }}</h6>
-                                <small class="text-muted">Uploaded: {{ audio.uploaded_at|date:"Y-m-d H:i" }}</small>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="{{ form.language.id_for_label }}" class="form-label">Input Language</label>
+                                {{ form.language }}
                             </div>
-                            <div>
-                                <a href="{% url 'translator:audio_detail' audio.pk %}" class="btn btn-sm btn-info">View</a>
-                                <a href="{% url 'translator:delete_audio' audio.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                            <div class="col-md-6">
+                                <label for="{{ form.output_language.id_for_label }}" class="form-label">Translate To</label>
+                                {{ form.output_language }}
                             </div>
                         </div>
-                        {% if audio.text_output %}
-                            <div class="mt-2">
-                                <small><strong>Transcription:</strong> {{ audio.text_output|truncatewords:20 }}</small>
+
+                        <button type="submit" class="btn btn-primary w-100 py-3 text-uppercase">
+                            <i class="fas fa-magic me-2"></i> Transcribe & Translate
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+        
+        <div class="mt-5">
+            <h4 class="mb-4">📜 Recent Conversions</h4>
+            {% if audio_files %}
+                <div class="list-group">
+                    {% for audio in audio_files %}
+                        <div class="list-group-item p-4">
+                            <div class="d-flex w-100 justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-1 text-white"><i class="fas fa-language me-2 text-primary"></i> {{ audio.get_language_display }} ➔ {{ audio.get_output_language_display }}</h6>
+                                    <small class="text-muted"><i class="far fa-clock me-1"></i> {{ audio.uploaded_at|date:"Y-m-d H:i" }}</small>
+                                </div>
+                                <div>
+                                    <a href="{% url 'translator:audio_detail' audio.pk %}" class="btn btn-sm btn-outline-info rounded-pill px-3 me-1">View</a>
+                                    <a href="{% url 'translator:delete_audio' audio.pk %}" class="btn btn-sm btn-outline-danger rounded-pill px-3">Delete</a>
+                                </div>
                             </div>
-                        {% endif %}
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="alert alert-info mt-3">
-                <p class="mb-0">No audio files yet. Upload one to get started!</p>
-            </div>
-        {% endif %}
+                            
+                            <div class="mb-3">
+                                <audio controls class="w-100">
+                                    <source src="{{ audio.audio_file.url }}" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </div>
+
+                            {% if audio.text_output %}
+                                <div class="p-3 rounded" style="background: rgba(0,0,0,0.2); border-left: 3px solid var(--primary-color);">
+                                    <small class="text-uppercase text-muted fw-bold d-block mb-1">Translation Result:</small>
+                                    <span class="text-white">{{ audio.text_output }}</span>
+                                </div>
+                            {% else %}
+                                <div class="p-3 rounded" style="background: rgba(0,0,0,0.2); border-left: 3px solid #ef4444;">
+                                    <span class="text-danger small">Processing failed or no speech detected.</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <p class="mb-0 text-center"><i class="fas fa-info-circle me-2"></i> No audio files yet. Record or upload one to get started!</p>
+                </div>
+            {% endif %}
+        </div>
+        
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnRecord = document.getElementById('btn-record');
+        const recordingStatus = document.getElementById('recording-status');
+        const btnSubmit = document.getElementById('btn-submit-recording');
+        const audioPreview = document.getElementById('audio-preview');
+        const fileInput = document.getElementById('recorded-audio-file');
+        
+        let isRecording = false;
+        let recorder;
+
+        btnRecord.addEventListener('click', async () => {
+            if (!isRecording) {
+                // START RECORDING
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    
+                    // Initialize RecordRTC
+                    recorder = new RecordRTC(stream, {
+                        type: 'audio',
+                        mimeType: 'audio/wav',
+                        recorderType: StereoAudioRecorder,
+                        desiredSampRate: 16000
+                    });
+
+                    recorder.startRecording();
+                    isRecording = true;
+                    
+                    // Update UI
+                    btnRecord.classList.add('recording-pulse');
+                    btnRecord.innerHTML = '<i class="fas fa-stop"></i>';
+                    recordingStatus.innerText = 'Recording... (Click stop when done)';
+                    btnSubmit.disabled = true;
+                    audioPreview.classList.add('d-none');
+                    
+                } catch (err) {
+                    console.error("Microphone access denied or error:", err);
+                    alert("Could not access microphone. Please ensure you have given permission.");
+                }
+            } else {
+                // STOP RECORDING
+                recorder.stopRecording(() => {
+                    isRecording = false;
+                    
+                    // Update UI
+                    btnRecord.classList.remove('recording-pulse');
+                    btnRecord.innerHTML = '<i class="fas fa-microphone"></i>';
+                    recordingStatus.innerText = '';
+                    btnSubmit.disabled = false;
+
+                    // Get the recorded blob
+                    const blob = recorder.getBlob();
+                    
+                    // Create a File object from the blob
+                    const fileName = 'recording_' + new Date().getTime() + '.wav';
+                    const file = new File([blob], fileName, { type: 'audio/wav' });
+                    
+                    // Attach the file to the hidden file input
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    fileInput.files = dataTransfer.files;
+
+                    // Setup audio preview
+                    const audioURL = URL.createObjectURL(blob);
+                    audioPreview.src = audioURL;
+                    audioPreview.classList.remove('d-none');
+
+                    // Stop all microphone tracks to release the mic
+                    recorder.camera.getTracks().forEach(track => track.stop());
+                });
+            }
+        });
+    });
+</script>
 {% endblock %}

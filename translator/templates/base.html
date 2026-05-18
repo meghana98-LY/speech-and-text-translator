@@ -5,151 +5,207 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}STT/TTS Translator{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.6.2/RecordRTC.min.js"></script>
     <style>
         :root {
-            --primary-color: #007bff;
-            --secondary-color: #6c757d;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: var(--text-main);
             min-height: 100vh;
-            padding-top: 20px;
+            padding-top: 100px; /* space for fixed navbar */
+            background-attachment: fixed;
         }
         
+        /* Glassmorphism Navbar */
         .navbar {
-            background: rgba(255, 255, 255, 0.95) !important;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: rgba(15, 23, 42, 0.75) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
         
         .navbar-brand {
             font-weight: 700;
-            color: var(--primary-color) !important;
+            color: white !important;
             font-size: 1.5rem;
+            letter-spacing: -0.5px;
         }
         
         .nav-link {
-            color: #333 !important;
+            color: var(--text-muted) !important;
+            font-weight: 500;
             transition: color 0.3s ease;
         }
         
-        .nav-link:hover {
-            color: var(--primary-color) !important;
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
         }
         
-        .container-main {
-            background: white;
-            border-radius: 15px;
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             padding: 40px;
             margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .glass-card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4, h5 {
+            font-weight: 600;
+            letter-spacing: -0.5px;
         }
         
         .hero-section {
             text-align: center;
-            color: white;
-            margin-bottom: 40px;
+            margin-bottom: 60px;
         }
         
         .hero-section h1 {
-            font-size: 3rem;
+            font-size: 4rem;
             font-weight: 700;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 15px;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
         .hero-section p {
-            font-size: 1.2rem;
-            margin-bottom: 30px;
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
         }
         
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            margin-bottom: 20px;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-        
-        .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px 10px 0 0;
-        }
-        
+        /* Buttons */
         .btn-primary {
             background: var(--primary-color);
             border: none;
-            border-radius: 8px;
-            padding: 10px 25px;
+            border-radius: 12px;
+            padding: 12px 25px;
             font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+        }
+        
+        /* Form Elements */
+        .form-control, .form-select {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            padding: 12px 15px;
             transition: all 0.3s ease;
         }
         
-        .btn-primary:hover {
-            background: #0056b3;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
-        }
-        
-        .btn-secondary {
-            background: var(--secondary-color);
-            border: none;
-        }
-        
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-        
-        .form-control, .form-select {
-            border-radius: 8px;
-            border: 2px solid #e9ecef;
-            padding: 10px 15px;
-            transition: border-color 0.3s ease;
-        }
-        
         .form-control:focus, .form-select:focus {
+            background: rgba(15, 23, 42, 0.8);
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            color: white;
+        }
+        
+        /* Fix for select dropdown options in dark mode */
+        option {
+            background: #1e293b;
+            color: white;
+        }
+        
+        .form-label {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        
+        /* Lists & Alerts */
+        .list-group-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px !important;
+            margin-bottom: 12px;
+            color: var(--text-main);
+            transition: all 0.2s ease;
+        }
+        
+        .list-group-item:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
         
         .alert {
-            border-radius: 10px;
-            border: none;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
         }
-        
-        .list-group-item {
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
+        .alert-success { background: rgba(34, 197, 94, 0.15); color: #4ade80; border-color: rgba(34, 197, 94, 0.3); }
+        .alert-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: rgba(239, 68, 68, 0.3); }
+        .alert-info { background: rgba(56, 189, 248, 0.15); color: #7dd3fc; border-color: rgba(56, 189, 248, 0.3); }
         
         footer {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px;
             text-align: center;
-            color: #666;
-            margin-top: 40px;
-            border-radius: 10px;
+            color: var(--text-muted);
+            margin-top: 60px;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+        
+        hr {
+            border-color: rgba(255, 255, 255, 0.1);
+            margin: 2rem 0;
+        }
+        
+        /* Audio Player Styling */
+        audio {
+            width: 100%;
+            border-radius: 8px;
+            height: 40px;
+            outline: none;
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top py-3">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'translator:home' %}">🎤 STT/TTS Translator</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'translator:home' %}">
+                <div style="background: linear-gradient(135deg, #818cf8, #c084fc); padding: 8px; border-radius: 10px; margin-right: 12px;">
+                    <i class="fas fa-wave-square" style="color: white;"></i>
+                </div>
+                Translator
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -157,11 +213,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'translator:home' %}">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'translator:stt' %}">🎙️ Speech to Text</a>
+                    <li class="nav-item ms-lg-3">
+                        <a class="nav-link" href="{% url 'translator:stt' %}"><i class="fas fa-microphone-alt me-1"></i> Speech to Text</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'translator:tts' %}">🔊 Text to Speech</a>
+                    <li class="nav-item ms-lg-3">
+                        <a class="nav-link" href="{% url 'translator:tts' %}"><i class="fas fa-volume-up me-1"></i> Text to Speech</a>
                     </li>
                 </ul>
             </div>
@@ -169,12 +225,12 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="container">
+    <div class="container pb-5">
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas fa-info-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
                 </div>
             {% endfor %}
         {% endif %}
@@ -184,7 +240,7 @@
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2024 STT/TTS Translator | Powered by Django</p>
+        <p>&copy; 2026 AI Translator | Built with Django</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
