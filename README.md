@@ -227,4 +227,3 @@ Contributions are welcome! Please:
 
 ---
 
-**Built with Django ❤️**
