@@ -64,7 +64,7 @@ import dj_database_url
 # -------------------- Database --------------------
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://neondb_owner:npg_9QWC5NhjegLa@ep-super-smoke-aqrq7dbn-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require',
+        default=os.getenv('url'),  # <-- load from .env file
         conn_max_age=600,
         conn_health_checks=True,
     )
