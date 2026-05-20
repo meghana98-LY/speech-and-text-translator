@@ -160,3 +160,4 @@ __pycache__/
 
 
 db.sqllite3
+.env
